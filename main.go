@@ -30,25 +30,30 @@ func readEnvVariableOrFile(variable string, required bool) ([]byte, error) {
 	return valueContent, nil
 }
 
+func readEnvOrFile(variable string) []byte {
+	val, _ := readEnvVariableOrFile(variable, false)
+	return val
+}
+
+func requireEnvOrFile(variable string) []byte {
+	val, err := readEnvVariableOrFile(variable, true)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return val
+}
+
 func main() {
-	caCert, err := readEnvVariableOrFile("VAULT_CACERT", false)
-	if err != nil {
-		log.Fatal(err)
-	}
+	// Create a vault snapshot
+	caCert := readEnvOrFile("VAULT_CACERT")
+	vaultToken := requireEnvOrFile("VAULT_TOKEN")
+	vaultAddr := requireEnvOrFile("VAULT_ADDR")
 
-	vaultToken, err := readEnvVariableOrFile("VAULT_TOKEN", true)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	client := CreateVaultClient("https://vault.wirywolf.com", string(vaultToken), caCert)
-
-	// now := time.Now()
-	// datetime := now.Format(time.RFC3339)
-	// snapshotName := fmt.Sprintf("%s.snap", datetime)
+	client := CreateVaultClient(string(vaultAddr), string(vaultToken), caCert)
 
 	snapshotName := "vault.snapshot"
-	err = client.CreateSnapshot(snapshotName)
+	err := client.CreateSnapshot(snapshotName)
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -1,0 +1,15 @@
+** Environment variables
+
+*** Vault
+
+- =VAULT_ADDR=: =https://server:port= or =@/path/to/file/=
+- =VAULT_TOKEN=: =abcd= or =@/path/to/file=
+- =VAULT_CACERT=: =Begin Certificate .. End= or =@/path/to/file=
+
+*** Restic
+
+Uses all environment variables supported by restic, here are some salient ones:
+
+- =RESTIC_REPOSITORY=: Path to repository
+- =RESTIC_PASSWORD_FILE=: Path to file containing password
+- =RESTIC_CACHE_DIR=: Path to directory where restsic's cache is stored

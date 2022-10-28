@@ -1,54 +1,18 @@
 package main
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"log"
-	"os"
+	"os/exec"
+	"strings"
 )
 
-func readEnvVariableOrFile(variable string, required bool) ([]byte, error) {
-	var valueContent []byte
-	value := os.Getenv(variable)
-	if value != "" {
-		if string(value[0]) == "@" {
-			filename := value[1:]
-			log.Printf("Reading %s from file: %s", variable, filename)
-			fileContent, err := ioutil.ReadFile(filename)
-			if err != nil {
-				return nil, err
-			}
-			valueContent = fileContent
-		} else {
-			valueContent = []byte(value)
-		}
-	} else if required {
-		return nil, errors.New(fmt.Sprintf("%s environment variable must be set.", variable))
-	}
-
-	return valueContent, nil
-}
-
-func readEnvOrFile(variable string) []byte {
-	val, _ := readEnvVariableOrFile(variable, false)
-	return val
-}
-
-func requireEnvOrFile(variable string) []byte {
-	val, err := readEnvVariableOrFile(variable, true)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	return val
-}
-
-func main() {
-	// Create a vault snapshot
-	caCert := readEnvOrFile("VAULT_CACERT")
-	vaultToken := requireEnvOrFile("VAULT_TOKEN")
-	vaultAddr := requireEnvOrFile("VAULT_ADDR")
+func createVaultSnapshot() {
+	caCert := ReadEnvOrFile("VAULT_CACERT")
+	vaultToken := RequireEnvOrFile("VAULT_TOKEN")
+	vaultAddr := RequireEnvOrFile("VAULT_ADDR")
 
 	client := CreateVaultClient(string(vaultAddr), string(vaultToken), caCert)
 
@@ -59,5 +23,38 @@ func main() {
 	}
 
 	log.Printf("Wrote vault snapshot to %s\n", snapshotName)
+}
+
+func RunRestic(arg ...string) (string, error) {
+	var stdout, stderr bytes.Buffer
+	cmd := exec.Command("restic", arg...)
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+
+	err := cmd.Run()
+	if err != nil {
+		return "", errors.New(fmt.Sprintf("%s: %s", err, stderr.String()))
+	}
+
+	return stdout.String(), nil
+}
+
+func main() {
+	// createVaultSnapshot()
+
+	// Initialize restic repo if required
+	_, err := RunRestic("cat", "config")
+	if err != nil {
+		if strings.Index(err.Error(), "unable to open config file") != -1 {
+			_, err := RunRestic("init")
+			if err != nil {
+				log.Fatalf("Could not initialize restic repository: %s", err)
+			}
+
+		}
+		log.Println("Initialized restic repository")
+	} else {
+		log.Println("Found existing restic repository")
+	}
 }
 

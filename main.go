@@ -5,7 +5,9 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"os"
 	"os/exec"
+	"path"
 )
 
 func RunRestic(arg ...string) (string, error) {
@@ -23,18 +25,28 @@ func RunRestic(arg ...string) (string, error) {
 }
 
 func main() {
+	var destDir string
+	if len(os.Args) > 1 {
+		destDir = os.Args[1]
+	} else {
+		destDir = "."
+	}
+	if err := os.MkdirAll(destDir, os.ModePerm); err != nil {
+		log.Fatal(err)
+	}
+
 	caCert := ReadEnvOrFile("VAULT_CACERT")
 	vaultToken := RequireEnvOrFile("VAULT_TOKEN")
 	vaultAddr := RequireEnvOrFile("VAULT_ADDR")
 
 	client := CreateVaultClient(string(vaultAddr), string(vaultToken), caCert)
 
-	snapshotName := "vault.snapshot"
-	err := client.CreateSnapshot(snapshotName)
+	snapshotPath := path.Join(destDir, "vault.snapshot")
+	err := client.CreateSnapshot(snapshotPath)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	log.Printf("Wrote vault snapshot to %s\n", snapshotName)
+	log.Printf("Wrote vault snapshot to %s\n", snapshotPath)
 }
 

@@ -18,9 +18,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      # This is necessary so that the binary can run on alpine linux.
-      CGO_ENABLED: 0
     steps:
     - uses: actions/checkout@v3
 
@@ -30,7 +27,7 @@ jobs:
         go-version: 1.18
 
     - name: Build
-      run: go build -v ./...
+      run: ./build.sh
 
     - name: Test
       run: go test -v ./...
@@ -39,4 +36,4 @@ jobs:
       if: ${{ inputs.upload-binary }}
       with:
         name: vault-snapshot
-        path: ./vault-snapshot
+        path: ./build/vault-snapshot

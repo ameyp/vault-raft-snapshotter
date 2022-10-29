@@ -35,7 +35,7 @@ jobs:
       run: go test -v ./...
 
     - name: Mark binary as executable
-      run: chmod +x vault-executable
+      run: chmod +x vault-snapshot
 
     - uses: actions/upload-artifact@v3
       if: ${{ inputs.upload-binary }}

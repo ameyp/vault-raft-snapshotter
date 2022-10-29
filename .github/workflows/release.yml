@@ -1,4 +1,4 @@
-name: "tagged-release"
+name: "Create release"
 
 on:
   push:
@@ -6,12 +6,13 @@ on:
       - "v*"
 
 jobs:
-  build:
+  Build:
     uses: ./.github/workflows/go.yml
 
-  tagged-release:
+  Create release:
     name: "Tagged Release"
     runs-on: "ubuntu-latest"
+    needs: Build
 
     steps:
       # ...

@@ -3,12 +3,14 @@ name: "Create release"
 on:
   push:
     tags:
-      - "v*"
+      - "*"
 
 jobs:
   build:
     name: "Build"
     uses: ./.github/workflows/go.yml
+    with:
+      upload-binary: true
 
   create-release:
     name: "Create release"

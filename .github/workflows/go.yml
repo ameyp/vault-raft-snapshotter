@@ -5,6 +5,11 @@ name: Build amd64 binary
 
 on:
   workflow_call:
+    inputs:
+      upload-binary:
+        required: false
+        type: boolean
+        default: false
   push:
     branches: [ "main" ]
   pull_request:
@@ -30,6 +35,7 @@ jobs:
       run: go test -v ./...
 
     - uses: actions/upload-artifact@v3
+      if: ${{ inputs.upload-binary }}
       with:
         name: vault-snapshot
         path: ./vault-snapshot

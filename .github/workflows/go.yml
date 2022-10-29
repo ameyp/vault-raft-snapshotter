@@ -19,6 +19,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
+      # This is necessary so that the binary can run on alpine linux.
       CGO_ENABLED: 0
     steps:
     - uses: actions/checkout@v3
@@ -33,9 +34,6 @@ jobs:
 
     - name: Test
       run: go test -v ./...
-
-    - name: Mark binary as executable
-      run: chmod +x vault-snapshot
 
     - uses: actions/upload-artifact@v3
       if: ${{ inputs.upload-binary }}

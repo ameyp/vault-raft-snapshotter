@@ -6,11 +6,12 @@ on:
       - "v*"
 
 jobs:
-  Build:
+  build:
+    name: "Build"
     uses: ./.github/workflows/go.yml
 
-  Create release:
-    name: "Tagged Release"
+  create-release:
+    name: "Create release"
     runs-on: "ubuntu-latest"
     needs: Build
 

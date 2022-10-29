@@ -1,6 +1,6 @@
 ** Purpose
 
-A lightweight binary that can be used to create vault raft snapshots without needing to download and use the giant Vault binary. It works by making an HTTP POST request against the snapshot endpoint.
+A lightweight binary that can be used to create vault raft snapshots without needing to download and use the giant Vault binary. It works by making an HTTP GET request against the snapshot endpoint.
 
 ** Environment variables
 

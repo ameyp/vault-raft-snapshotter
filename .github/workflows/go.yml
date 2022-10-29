@@ -4,6 +4,7 @@
 name: Build amd64 binary
 
 on:
+  workflow_call:
   push:
     branches: [ "main" ]
   pull_request:

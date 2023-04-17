@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
@@ -36,10 +37,30 @@ func main() {
 	}
 
 	caCert := ReadEnvOrFile("VAULT_CACERT")
-	vaultToken := RequireEnvOrFile("VAULT_TOKEN")
 	vaultAddr := RequireEnvOrFile("VAULT_ADDR")
+	vaultToken := ReadEnvOrFile("VAULT_TOKEN")
+	vaultRole := ReadEnvOrFile("VAULT_ROLE")
+	var client Vault
 
-	client := CreateVaultClient(string(vaultAddr), string(vaultToken), caCert)
+	if vaultToken == nil {
+		if vaultRole != nil {
+			filename := "/var/run/secrets/kubernetes.io/serviceaccount/token"
+			jwtToken, err := ioutil.ReadFile(filename)
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			client = CreateVaultClient(string(vaultAddr), "", caCert)
+			err = client.Login(string(vaultRole), string(jwtToken))
+			if err != nil {
+				log.Fatal(err)
+			}
+		} else {
+			log.Fatal("Either VAULT_TOKEN or SERVICE_ACCOUNT must be specified")
+		}
+	} else {
+		client = CreateVaultClient(string(vaultAddr), string(vaultToken), caCert)
+	}
 
 	snapshotPath := path.Join(destDir, "vault.snapshot")
 	err := client.CreateSnapshot(snapshotPath)

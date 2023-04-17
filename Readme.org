@@ -10,3 +10,17 @@ I intend to use this in conjunction with a Vault injector sidecar on Kubernetes,
 - =VAULT_TOKEN=: =abcd= or =@/path/to/file=
 - =VAULT_CACERT=: =Begin Certificate .. End= or =@/path/to/file=
 
+** Local development
+
+Set up a `kind` cluster with:
+
+```
+ctlptl create registry ctlptl-registry --port=5005
+ctlptl create cluster kind --registry=ctlptl-registry
+```
+
+Install vault:
+
+```
+helm install vault hashicorp/vault -f local-development/vault-values.yaml --create-namespace -n vault
+```
